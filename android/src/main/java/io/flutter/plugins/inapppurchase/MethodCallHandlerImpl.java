@@ -300,8 +300,8 @@ class MethodCallHandlerImpl implements Application.ActivityLifecycleCallbacks, I
             params.setType(products.get(0).getProductType().name());
             if (billingClient != null) {
                 SkuDetailsResponseListener skuDetailsResponseListener = (billingResult, list) -> {
-                    List<GoogleProductDetails> resultList = new ArrayList<>();
-                    if (list != null) {
+                    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && list != null) {
+                        List<GoogleProductDetails> resultList = new ArrayList<>();
                         for (SkuDetails skuDetails : list) {
                             resultList.add(new GoogleProductDetails(null, skuDetails));
                         }
@@ -311,8 +311,9 @@ class MethodCallHandlerImpl implements Application.ActivityLifecycleCallbacks, I
                                         .setBillingResult(fromBillingResult(billingResult))
                                         .setProductDetails(fromSkuList(list));
                         result.success(responseBuilder.build());
+                    } else {
+                        result.error(new FlutterError("" + billingResult.getResponseCode(), billingResult.getDebugMessage(), null));
                     }
-
                 };
                 billingClient.querySkuDetailsAsync(params.build(), skuDetailsResponseListener);
             }
