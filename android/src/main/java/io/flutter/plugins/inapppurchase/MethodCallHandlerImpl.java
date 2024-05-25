@@ -251,15 +251,18 @@ class MethodCallHandlerImpl implements Application.ActivityLifecycleCallbacks, I
         }
 
         try {
+            List<QueryProductDetailsParams.Product> productList = toProductList(products);
             QueryProductDetailsParams params =
-                    QueryProductDetailsParams.newBuilder().setProductList(toProductList(products)).build();
+                    QueryProductDetailsParams.newBuilder().setProductList(productList).build();
             billingClient.queryProductDetailsAsync(
                     params,
                     (billingResult, productDetailsList) -> {
 
                         if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.FEATURE_NOT_SUPPORTED) {
-                            // 兼容旧版本google商店
-                            doPayCompat(products, result);
+                            if (!productList.isEmpty()) {
+                                // 兼容旧版本google商店
+                                doPayCompat(products, result, productList.get(0).zzb());
+                            }
                             return;
                         }
                         List<GoogleProductDetails> productDetails = new ArrayList<>();
@@ -283,7 +286,7 @@ class MethodCallHandlerImpl implements Application.ActivityLifecycleCallbacks, I
     /**
      * 兼容旧版本google商店（旧版本google商店不支持[ProductDetails]）
      */
-    private void doPayCompat(@NonNull List<PlatformQueryProduct> products, @NonNull Result<PlatformProductDetailsResponse> result) {
+    private void doPayCompat(@NonNull List<PlatformQueryProduct> products, @NonNull Result<PlatformProductDetailsResponse> result, String type) {
         if (billingClient == null) {
             result.error(getNullBillingClientError());
             return;
@@ -297,7 +300,7 @@ class MethodCallHandlerImpl implements Application.ActivityLifecycleCallbacks, I
         if (!skuList.isEmpty()) {
             SkuDetailsParams.Builder builder = SkuDetailsParams.newBuilder();
             builder.setSkusList(skuList);
-            builder.setType(products.get(0).getProductType() == PlatformProductType.SUBS ? BillingClient.ProductType.SUBS : BillingClient.ProductType.INAPP);
+            builder.setType(type);
             SkuDetailsParams params = builder.build();
             if (billingClient != null) {
                 SkuDetailsResponseListener skuDetailsResponseListener = (billingResult, list) -> {
@@ -313,7 +316,10 @@ class MethodCallHandlerImpl implements Application.ActivityLifecycleCallbacks, I
                                         .setProductDetails(fromSkuList(list));
                         result.success(responseBuilder.build());
                     } else {
-                        result.error(new FlutterError("" + billingResult.getResponseCode(), billingResult.getDebugMessage() + "type=" + params.getSkuType() + "skuList=" + params.getSkusList(), null));
+                        FlutterError error = new FlutterError("" + billingResult.getResponseCode(),
+                                billingResult.getDebugMessage() + "type=" + params.getSkuType() + ",skuList=" + params.getSkusList(),
+                                products);
+                        result.error(error);
                     }
                 };
                 billingClient.querySkuDetailsAsync(params, skuDetailsResponseListener);

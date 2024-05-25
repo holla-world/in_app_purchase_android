@@ -185,6 +185,14 @@ public class Messages {
             this.productType = setterArg;
         }
 
+        @Override
+        public String toString() {
+            return "PlatformQueryProduct{" +
+                    "productId='" + productId + '\'' +
+                    ", productType=" + productType +
+                    '}';
+        }
+
         /**
          * Constructor is non-public to enforce null safety; use Builder.
          */
