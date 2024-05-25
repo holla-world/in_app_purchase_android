@@ -304,6 +304,8 @@ class MethodCallHandlerImpl implements Application.ActivityLifecycleCallbacks, I
             SkuDetailsParams params = builder.build();
             if (billingClient != null) {
                 SkuDetailsResponseListener skuDetailsResponseListener = (billingResult, list) -> {
+                    Log.d("BillingClient", "旧版本google play 查询商品信息回调" + billingResult.getResponseCode() + "," + billingResult.getDebugMessage());
+                    Log.d("BillingClient", "旧版本google play 查询商品信息回调" + list);
                     if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && list != null) {
                         List<GoogleProductDetails> resultList = new ArrayList<>();
                         for (SkuDetails skuDetails : list) {
@@ -318,7 +320,7 @@ class MethodCallHandlerImpl implements Application.ActivityLifecycleCallbacks, I
                     } else {
                         FlutterError error = new FlutterError("" + billingResult.getResponseCode(),
                                 billingResult.getDebugMessage() + "type=" + params.getSkuType() + ",skuList=" + params.getSkusList(),
-                                products);
+                                null);
                         result.error(error);
                     }
                 };
