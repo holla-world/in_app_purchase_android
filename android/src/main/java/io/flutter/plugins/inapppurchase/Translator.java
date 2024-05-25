@@ -15,6 +15,7 @@ import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchaseHistoryRecord;
 import com.android.billingclient.api.QueryProductDetailsParams;
+import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.UserChoiceDetails;
 import io.flutter.plugins.inapppurchase.Messages.FlutterError;
 import io.flutter.plugins.inapppurchase.Messages.PlatformAccountIdentifiers;
@@ -55,6 +56,15 @@ import java.util.Locale;
             fromOneTimePurchaseOfferDetails(detail.getOneTimePurchaseOfferDetails()))
         .setSubscriptionOfferDetails(
             fromSubscriptionOfferDetailsList(detail.getSubscriptionOfferDetails()))
+        .build();
+  }
+
+  static @NonNull PlatformProductDetails fromProductDetail(@NonNull SkuDetails detail) {
+    return new PlatformProductDetails.Builder()
+        .setTitle(detail.getTitle())
+        .setDescription(detail.getDescription())
+        .setProductId(detail.getSku())
+        .setProductType(toPlatformProductType(detail.getType()))
         .build();
   }
 
@@ -105,6 +115,18 @@ import java.util.Locale;
 
     ArrayList<PlatformProductDetails> output = new ArrayList<>();
     for (ProductDetails detail : productDetailsList) {
+      output.add(fromProductDetail(detail));
+    }
+    return output;
+  }
+  static @NonNull List<PlatformProductDetails> fromSkuList(
+      @Nullable List<SkuDetails> productDetailsList) {
+    if (productDetailsList == null) {
+      return Collections.emptyList();
+    }
+
+    ArrayList<PlatformProductDetails> output = new ArrayList<>();
+    for (SkuDetails detail : productDetailsList) {
       output.add(fromProductDetail(detail));
     }
     return output;
