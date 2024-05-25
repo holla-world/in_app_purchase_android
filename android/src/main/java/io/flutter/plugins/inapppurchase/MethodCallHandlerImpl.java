@@ -295,9 +295,10 @@ class MethodCallHandlerImpl implements Application.ActivityLifecycleCallbacks, I
             skuList.add(product.getProductId());
         }
         if (!skuList.isEmpty()) {
-            SkuDetailsParams.Builder params = SkuDetailsParams.newBuilder();
-            params.setSkusList(skuList);
-            params.setType(products.get(0).getProductType().name());
+            SkuDetailsParams.Builder builder = SkuDetailsParams.newBuilder();
+            builder.setSkusList(skuList);
+            builder.setType(products.get(0).getProductType() == PlatformProductType.SUBS ? BillingClient.ProductType.SUBS : BillingClient.ProductType.INAPP);
+            SkuDetailsParams params = builder.build();
             if (billingClient != null) {
                 SkuDetailsResponseListener skuDetailsResponseListener = (billingResult, list) -> {
                     if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && list != null) {
@@ -312,10 +313,10 @@ class MethodCallHandlerImpl implements Application.ActivityLifecycleCallbacks, I
                                         .setProductDetails(fromSkuList(list));
                         result.success(responseBuilder.build());
                     } else {
-                        result.error(new FlutterError("" + billingResult.getResponseCode(), billingResult.getDebugMessage(), null));
+                        result.error(new FlutterError("" + billingResult.getResponseCode(), billingResult.getDebugMessage() + "type=" + params.getSkuType() + "skuList=" + params.getSkusList(), null));
                     }
                 };
-                billingClient.querySkuDetailsAsync(params.build(), skuDetailsResponseListener);
+                billingClient.querySkuDetailsAsync(params, skuDetailsResponseListener);
             }
         }
     }
