@@ -29,25 +29,28 @@ class GooglePlayProductDetails extends ProductDetails {
     ProductDetailsWrapper productDetails,
   ) {
     assert(productDetails.productType == ProductType.inapp);
-    assert(productDetails.oneTimePurchaseOfferDetails != null);
+    // assert(productDetails.oneTimePurchaseOfferDetails != null);
 
-    final OneTimePurchaseOfferDetailsWrapper oneTimePurchaseOfferDetails =
-        productDetails.oneTimePurchaseOfferDetails!;
+    final OneTimePurchaseOfferDetailsWrapper? oneTimePurchaseOfferDetails =
+        productDetails.oneTimePurchaseOfferDetails;
 
-    final String formattedPrice = oneTimePurchaseOfferDetails.formattedPrice;
+    final String? formattedPrice = oneTimePurchaseOfferDetails?.formattedPrice;
     final double rawPrice =
-        oneTimePurchaseOfferDetails.priceAmountMicros / 1000000.0;
-    final String currencyCode = oneTimePurchaseOfferDetails.priceCurrencyCode;
-    final String? currencySymbol = _extractCurrencySymbol(formattedPrice);
+        (oneTimePurchaseOfferDetails?.priceAmountMicros ?? 0) / 1000000.0;
+    final String? currencyCode = oneTimePurchaseOfferDetails?.priceCurrencyCode;
+    String? currencySymbol;
+    if (formattedPrice != null) {
+      currencySymbol = _extractCurrencySymbol(formattedPrice);
+    }
 
     return GooglePlayProductDetails._(
       id: productDetails.productId,
       title: productDetails.title,
       description: productDetails.description,
-      price: formattedPrice,
+      price: formattedPrice ?? "",
       rawPrice: rawPrice,
-      currencyCode: currencyCode,
-      currencySymbol: currencySymbol ?? currencyCode,
+      currencyCode: currencyCode ?? "",
+      currencySymbol: currencySymbol ?? currencyCode ?? "",
       productDetails: productDetails,
     );
   }

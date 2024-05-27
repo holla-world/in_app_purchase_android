@@ -30,9 +30,9 @@ const String _kSilverSubscriptionId = 'subscription_silver1';
 const String _kGoldSubscriptionId = 'subscription_gold1';
 const List<String> _kProductIds = <String>[
   _kConsumableId,
-  _kUpgradeId,
-  _kSilverSubscriptionId,
-  _kGoldSubscriptionId,
+  // _kUpgradeId,
+  // _kSilverSubscriptionId,
+  // _kGoldSubscriptionId,
 ];
 
 class _MyApp extends StatefulWidget {
@@ -103,8 +103,10 @@ class _MyAppState extends State<_MyApp> {
       return;
     }
 
+    print("查询商品信息");
     final ProductDetailsResponse productDetailResponse =
         await _inAppPurchasePlatform.queryProductDetails(_kProductIds.toSet());
+    print("查询商品信息response");
     if (productDetailResponse.error != null) {
       setState(() {
         _queryProductError = productDetailResponse.error!.message;

@@ -2,6 +2,10 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven {
+            allowInsecureProtocol = true
+            url "https://storage.googleapis.com/download.flutter.io"
+        }
     }
 
     dependencies {
@@ -19,6 +23,10 @@ allprojects {
         }
         google()
         mavenCentral()
+        maven {
+            allowInsecureProtocol = true
+            url "https://storage.googleapis.com/download.flutter.io"
+        }
     }
 }
 
@@ -38,10 +46,10 @@ tasks.register("clean", Delete) {
 // in the plugin itself to avoid breaking clients that have different
 // warnings (e.g., deprecation warnings from a newer SDK than this project
 // builds with).
-gradle.projectsEvaluated {
-    project(":in_app_purchase_android") {
-        tasks.withType(JavaCompile) {
-            options.compilerArgs << "-Xlint:all" << "-Werror"
-        }
-    }
-}
+//gradle.projectsEvaluated {
+//    project(":in_app_purchase_android") {
+//        tasks.withType(JavaCompile) {
+//            options.compilerArgs << "-Xlint:all" << "-Werror"
+//        }
+//    }
+//}

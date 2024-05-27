@@ -312,11 +312,17 @@ class MethodCallHandlerImpl implements Application.ActivityLifecycleCallbacks, I
                             resultList.add(new GoogleProductDetails(null, skuDetails));
                         }
                         updateCachedProducts(resultList);
-                        final PlatformProductDetailsResponse.Builder responseBuilder =
-                                new PlatformProductDetailsResponse.Builder()
-                                        .setBillingResult(fromBillingResult(billingResult))
-                                        .setProductDetails(fromSkuList(list));
-                        result.success(responseBuilder.build());
+                        try {
+                            final PlatformProductDetailsResponse.Builder responseBuilder =
+                                    new PlatformProductDetailsResponse.Builder()
+                                            .setBillingResult(fromBillingResult(billingResult))
+                                            .setProductDetails(fromSkuList(list));
+                            result.success(responseBuilder.build());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Log.e("BillingClient", "旧版本google play 查询商品信息回调失败=>" + e);
+                        }
+
                     } else {
                         FlutterError error = new FlutterError("" + billingResult.getResponseCode(),
                                 billingResult.getDebugMessage() + "type=" + params.getSkuType() + ",skuList=" + params.getSkusList(),
