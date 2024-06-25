@@ -139,6 +139,46 @@ class InAppPurchaseAndroidPlatform extends InAppPurchasePlatform {
                 details: exception.details));
   }
 
+  Future<bool> buyConsumableWithProfileId(
+      {required PurchaseParam purchaseParam,
+      bool autoConsume = true,
+      String? profileId}) {
+    if (autoConsume) {
+      _productIdsToConsume.add(purchaseParam.productDetails.id);
+    }
+    return buyWithProfileId(purchaseParam: purchaseParam, profileId: profileId);
+  }
+
+  Future<bool> buyWithProfileId(
+      {required PurchaseParam purchaseParam, String? profileId}) async {
+    ChangeSubscriptionParam? changeSubscriptionParam;
+
+    if (purchaseParam is GooglePlayPurchaseParam) {
+      changeSubscriptionParam = purchaseParam.changeSubscriptionParam;
+    }
+
+    String? offerToken;
+    if (purchaseParam.productDetails is GooglePlayProductDetails) {
+      offerToken =
+          (purchaseParam.productDetails as GooglePlayProductDetails).offerToken;
+    }
+
+    final BillingResultWrapper billingResultWrapper =
+        await billingClientManager.runWithClient(
+      (BillingClient client) => client.launchBillingFlow(
+          product: purchaseParam.productDetails.id,
+          offerToken: offerToken,
+          accountId: purchaseParam.applicationUserName,
+          obfuscatedProfileId: profileId,
+          oldProduct: changeSubscriptionParam?.oldPurchaseDetails.productID,
+          purchaseToken: changeSubscriptionParam
+              ?.oldPurchaseDetails.verificationData.serverVerificationData,
+          prorationMode: changeSubscriptionParam?.prorationMode,
+          replacementMode: changeSubscriptionParam?.replacementMode),
+    );
+    return billingResultWrapper.responseCode == BillingResponse.ok;
+  }
+
   @override
   Future<bool> buyNonConsumable({required PurchaseParam purchaseParam}) async {
     ChangeSubscriptionParam? changeSubscriptionParam;
